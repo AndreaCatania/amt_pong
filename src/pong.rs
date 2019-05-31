@@ -15,6 +15,7 @@ pub const ARENA_WIDTH: f32 = 100.0;
 pub const ARENA_HEIGHT: f32 = 100.0;
 pub const PADDLE_WIDTH: f32 = 4.0;
 pub const PADDLE_HEIGHT: f32 = 32.0;
+pub const PADDLE_VELOCITY: f32 = 10.0; // 10 unit per sec
 
 pub struct Pong {}
 
