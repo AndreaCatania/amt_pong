@@ -1,42 +1,46 @@
 extern crate amethyst;
 
 use amethyst::{
-    core::transform::TransformBundle,
-    prelude::*,
-    window::{DisplayConfig, WindowBundle},
-    renderer::{
-        types::DefaultBackend, RenderingSystem,
-        sprite::{SpriteSheet},
-    },
-    utils::application_root_dir,
     assets::Processor,
-    ui::{DrawUiDesc, UiBundle,},
+    core::transform::TransformBundle,
     input::{InputBundle, StringBindings},
+    prelude::*,
+    renderer::{sprite::SpriteSheet, types::DefaultBackend, RenderingSystem},
+    ui::{DrawUiDesc, UiBundle},
+    utils::application_root_dir,
+    window::{DisplayConfig, WindowBundle},
 };
 
 use crate::render_graph::RenderGraph;
 
-
-mod render_graph;
 mod pong;
+mod render_graph;
 mod systems;
 
 fn main() -> amethyst::Result<()> {
     amethyst::Logger::from_config(Default::default())
-       // .level_for("amethyst_rendy", amethyst::LogLevelFilter::Warn)
+        // .level_for("amethyst_rendy", amethyst::LogLevelFilter::Warn)
         .level_for("gfx_backend_vulkan", amethyst::LogLevelFilter::Warn)
         .level_for("rendy_factory::factory", amethyst::LogLevelFilter::Warn)
-        .level_for("rendy_memory::allocator::dynamic", amethyst::LogLevelFilter::Warn)
-        .level_for("rendy_graph::node::render::pass", amethyst::LogLevelFilter::Warn)
+        .level_for(
+            "rendy_memory::allocator::dynamic",
+            amethyst::LogLevelFilter::Warn,
+        )
+        .level_for(
+            "rendy_graph::node::render::pass",
+            amethyst::LogLevelFilter::Warn,
+        )
         .level_for("rendy_graph::node::present", amethyst::LogLevelFilter::Warn)
         .level_for("rendy_graph::graph", amethyst::LogLevelFilter::Warn)
-        .level_for("rendy_memory::allocator::linear", amethyst::LogLevelFilter::Warn)
+        .level_for(
+            "rendy_memory::allocator::linear",
+            amethyst::LogLevelFilter::Warn,
+        )
         .level_for("rendy_wsi", amethyst::LogLevelFilter::Warn)
         .start();
 
     let display_config = "resources/display_config.ron";
     let display_config = DisplayConfig::load(&display_config);
-
 
     let input_bind_config = "resources/bindings_config.ron";
     let input_bundle =
@@ -58,11 +62,8 @@ fn main() -> amethyst::Result<()> {
             &[],
         )
         .with_bundle(input_bundle)?
-        .with(
-            systems::PaddleSystem,
-            "paddle_system",
-        &["input_system"]);
-
+        .with(systems::PaddleSystem, "paddle_system", &["input_system"])
+        .with(systems::BallSystem, "ball_system", &[]);
 
     let mut game = Application::new("./", pong::Pong {}, game_data)?;
 

@@ -1,21 +1,27 @@
+extern crate nalgebra;
+
 use amethyst::assets::{AssetStorage, Loader};
 use amethyst::core::transform::Transform;
 use amethyst::ecs::prelude::{Component, DenseVecStorage};
 use amethyst::prelude::*;
 use amethyst::renderer::{
     camera::{Camera, Projection},
-    sprite::{SpriteRender, SpriteSheetFormat,SpriteSheetHandle,SpriteSheet},
     formats::texture::ImageFormat,
     loaders,
+    sprite::{SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle},
     types::TextureData,
     Texture,
 };
+
+use nalgebra::Vector2;
 
 pub const ARENA_WIDTH: f32 = 100.0;
 pub const ARENA_HEIGHT: f32 = 100.0;
 pub const PADDLE_WIDTH: f32 = 4.0;
 pub const PADDLE_HEIGHT: f32 = 32.0;
-pub const PADDLE_VELOCITY: f32 = 10.0; // 10 unit per sec
+pub const PADDLE_VELOCITY: f32 = 50.0; // unit per sec
+pub const BALL_MAX_VELOCITY: f32 = 200.0; // Unit per sec
+pub const BALL_RADIUS: f32 = 2.0;
 
 pub struct Pong {}
 
@@ -30,8 +36,9 @@ impl SimpleState for Pong {
         let sprite_sheet = Pong::load_sprite(data.world);
         Pong::initialize_paddle(data.world, &Side::Left, &sprite_sheet);
         Pong::initialize_paddle(data.world, &Side::Right, &sprite_sheet);
+        Pong::initialize_ball(data.world, &sprite_sheet);
 
-        println!("on_start executed");
+        println!("Pong game start is executed");
     }
 }
 
@@ -43,7 +50,7 @@ impl Pong {
 
     fn initialize_camera(world: &mut World) {
         let mut transform = Transform::default();
-        transform.set_translation_xyz(0., 0.0, 1.0); // Move the camera 1 unit away from the arena board
+        transform.set_translation_xyz(0.0, 0.0, 1.0); // Move the camera 1 unit away from the arena board
 
         world
             .create_entity()
@@ -91,6 +98,29 @@ impl Pong {
             .build();
     }
 
+    fn initialize_ball(world: &mut World, sprite_sheet: &SpriteSheetHandle) {
+        // Create the entity components
+
+        let mut ball = BallComponent::new();
+        ball.set_velocity(Vector2::new(0.5, -1.0).normalize() * BALL_MAX_VELOCITY);
+
+        let mut transform = Transform::default();
+        transform.set_translation_xyz(ARENA_WIDTH * 0.5, ARENA_HEIGHT * 0.5, 0.0);
+
+        let sprite = SpriteRender {
+            sprite_sheet: sprite_sheet.clone(),
+            sprite_number: 1,
+        };
+
+        // Create the Entity
+        world
+            .create_entity()
+            .with(ball)
+            .with(transform)
+            .with(sprite)
+            .build();
+    }
+
     fn load_sprite(world: &mut World) -> SpriteSheetHandle {
         // This function is resopnsible for loading the sprite sheet
         // and is composed by two section.
@@ -125,10 +155,15 @@ pub enum Side {
     Right,
 }
 
+// TODO please rename this to PaddleComponent
 pub struct Paddle {
     pub side: Side,
     pub width: f32,
     pub height: f32,
+}
+
+impl Component for Paddle {
+    type Storage = DenseVecStorage<Self>;
 }
 
 impl Paddle {
@@ -144,6 +179,32 @@ impl Paddle {
     }
 }
 
-impl Component for Paddle {
+pub struct BallComponent {
+    velocity: Vector2<f32>,
+    radius: f32,
+}
+
+impl Component for BallComponent {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl BallComponent {
+    pub fn new() -> BallComponent {
+        BallComponent {
+            velocity: Vector2::new(0.0, 0.0),
+            radius: BALL_RADIUS,
+        }
+    }
+
+    pub fn get_velocity(&self) -> &Vector2<f32> {
+        &self.velocity
+    }
+
+    pub fn set_velocity(&mut self, velocity: Vector2<f32>) {
+        self.velocity = velocity;
+    }
+
+    pub fn get_radius(&self) -> f32 {
+        self.radius
+    }
 }

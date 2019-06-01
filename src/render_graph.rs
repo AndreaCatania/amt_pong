@@ -1,4 +1,3 @@
-
 use std::sync::Arc;
 
 use amethyst::{
@@ -14,7 +13,7 @@ use amethyst::{
             },
             hal::{
                 command::{ClearDepthStencil, ClearValue},
-                format::{Format},
+                format::Format,
                 image::Kind,
             },
         },
@@ -72,8 +71,7 @@ impl GraphCreator<DefaultBackend> for RenderGraph {
             .surface_format
             .get_or_insert_with(|| factory.get_surface_format(&surface));
         let dimensions = self.dimensions.as_ref().unwrap();
-        let window_kind =
-            Kind::D2(dimensions.width() as u32, dimensions.height() as u32, 1, 1);
+        let window_kind = Kind::D2(dimensions.width() as u32, dimensions.height() as u32, 1, 1);
 
         // Begin building our RenderGraph
         let mut graph_builder = GraphBuilder::new();
