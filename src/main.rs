@@ -2,7 +2,7 @@ extern crate amethyst;
 
 use amethyst::{
     assets::Processor,
-    core::transform::TransformBundle,
+    core::{transform::TransformBundle, frame_limiter::FrameRateLimitStrategy},
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{sprite::SpriteSheet, types::DefaultBackend, RenderingSystem},
@@ -65,7 +65,9 @@ fn main() -> amethyst::Result<()> {
         .with(systems::PaddleSystem, "paddle_system", &["input_system"])
         .with(systems::BallSystem, "ball_system", &[]);
 
-    let mut game = Application::new("./", pong::Pong {}, game_data)?;
+    let mut game = Application::build("./", pong::Pong {})?
+        .with_frame_limit(FrameRateLimitStrategy::Unlimited, 1000)
+        .build(game_data)?;
 
     game.run();
 
